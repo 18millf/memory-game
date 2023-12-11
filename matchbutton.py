@@ -20,7 +20,6 @@ class MatchButton(Button):
         super().__init__(**kwargs)
 
         self.__other_half: MatchButton
-        self.__symbol: str
 
         MatchButton.all_buttons.append(self)
 
@@ -31,7 +30,7 @@ class MatchButton(Button):
         self.__other_half = value
 
     def __set_symbol(self, symbol: str) -> None:
-        self.__symbol = symbol
+        self.text = symbol
         
     @staticmethod
     def associate(a: MatchButton, b: MatchButton, symbol: str):
