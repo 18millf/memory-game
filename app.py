@@ -12,3 +12,6 @@ class Application(App):
     def build(self) -> Widget:
         self.root = MainView(ROWS, COLUMNS)
         return self.root
+
+
+Application().run()
