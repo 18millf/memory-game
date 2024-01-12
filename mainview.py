@@ -20,10 +20,13 @@ class MainView(GridLayout):
             button: MatchButton = MatchButton()
             self.__buttons.append(button)
 
-        shuffle(self.__buttons)
-
         for i in range(0, cells, 2):
             button_a: MatchButton = self.__buttons[i]
             button_b: MatchButton = self.__buttons[i + 1]
 
             MatchButton.associate(button_a, button_b, MainView.SYMBOLS[i // 2])
+
+        shuffle(self.__buttons)
+
+        for button in self.__buttons:
+            self.add_widget(button)
