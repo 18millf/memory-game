@@ -7,108 +7,101 @@ class MatchButton(Button):
 
 
 class MatchButton(Button):
-    all_buttons: list()
-    pair_pending: MatchButton
-
-    def get_other_half(self) -> MatchButton:
-        pass
-
-    def __set_other_half(self) -> None:
-        pass
-
-    def __set_symbol(self, symbol: str) -> None:
-        pass
+    all_buttons: list[MatchButton]
 
 
 class MatchButton(Button):
-    all_buttons: list() = list()
-    pair_pending: MatchButton = None
+    all_buttons: list[MatchButton] = list()
+    working_pair: (MatchButton, MatchButton) = (None, None)
 
-    def __init__(self, **kwargs):
+    def __init__(self, symbol: str, **kwargs):
         super().__init__(**kwargs)
 
-        self.__other_half: MatchButton = None
-        self.flipped: bool = False
-        self.matched: bool = False
-
-        self.symbol: str = None
-
-        self.background_disabled_normal = self.background_normal
-        self.disabled_color = self.color
-
         MatchButton.all_buttons.append(self)
-
-    def get_other_half(self) -> MatchButton:
-        return self.__other_half
-
-    def set_other_half(self, value: MatchButton) -> None:
-        self.__other_half = value
-
-    def __set_symbol(self, symbol: str) -> None:
+        
         self.symbol = symbol
 
     def on_press(self):
-        super().on_press()
-
-        self.flipped = True
-        self.disabled = True
+        button_a, _ = MatchButton.working_pair
         self.background_color = "blue"
+
+        self.show_symbol()
+
+        if button_a == None:
+            MatchButton.working_pair = (self, None)
+        else:
+            for button in MatchButton.all_buttons:
+                button.disabled = True
+
+            MatchButton.working_pair = (button_a, self)
+
+            a, b = MatchButton.working_pair
+
+            if MatchButton.is_match(MatchButton.working_pair):
+                MatchButton.buttons_matched(a, b)
+            else:
+                MatchButton.buttons_not_mached(a, b)
+
+            if MatchButton.working_pair[0] != None and MatchButton.working_pair[1] != None:
+                MatchButton.schedule_hide(MatchButton.working_pair)
+
+                for button in MatchButton.all_buttons:
+                    button.disabled = True
+
+        return super().on_press()
+    
+    def show_symbol(self):
         self.text = self.symbol
 
-        if MatchButton.pair_pending is not None:
-            if MatchButton.pair_pending is not None and self.__other_half.flipped:
-                self.on_good_match(self.__other_half)
-                self.matched = True
-                MatchButton.pair_pending.matched = True
-            else:
-                self.on_bad_match(MatchButton.pair_pending)
+    def hide_symbol(self):
+        self.text = ""
 
-            MatchButton.pair_pending = None
-            self.on_match_finish(self.__other_half)
-        else:
-            MatchButton.pair_pending = self
+    def schedule_hide(pair: (MatchButton, MatchButton)):
+        Clock.schedule_once(lambda _: MatchButton.hide_symbols_if_no_match(pair), 1)
+    
+    def hide_symbols_if_no_match(pair: (MatchButton, MatchButton)):
+        a, b = pair
 
-    def on_good_match(self, other):
-        self.background_color = "green"
-        other.background_color = "green"
-        for button in self.all_buttons:
-            button.disabled = True
+        a.hide_symbol()
+        b.hide_symbol()
 
-        other.matched = True
-        self.matched = True
+        a.background_color = "white"
+        b.background_color = "white"
 
-        Clock.schedule_once(lambda _: MatchButton.reenable_buttons(self), 1)
-
-    def on_bad_match(self, other):
-        self.background_color = "red"
-        other.background_color = "red"
-
-        for button in self.all_buttons:
-            button.disabled = True
-
-        Clock.schedule_once(lambda _: MatchButton.reenable_buttons(self), 1)
-
-
-    def on_match_finish(self, other):
-        self.flipped = False
-        other.flipped = False
-        self.pair_pending = False
-        other.pair_pending = False
-
-    @staticmethod
-    def associate(a: MatchButton, b: MatchButton, symbol: str):
-        a.__set_symbol(symbol)
-        b.__set_symbol(symbol)
-
-        a.set_other_half(b)
-        b.set_other_half(a)
-
-    @staticmethod
-    def reenable_buttons(instance: MatchButton):
         for button in MatchButton.all_buttons:
-            if not button.matched:
-                button.disabled = False
-                button.background_color = [1, 1, 1, 1]
-                button.text = ""
+            button.disabled = False
+                    
+        if MatchButton.is_match((a, b)):
+            a, b = MatchButton.working_pair
+            a.disabled = True
+            b.disabled = True
 
+            a.show_symbol()
+            b.show_symbol()
+
+            a.background_color = "lime"
+            b.background_color = "lime"
+            
+            MatchButton.working_pair = (None, None)
+        elif a != None and b != None:
+            MatchButton.working_pair = (None, None)
+
+
+    @staticmethod
+    def is_match(pair: (MatchButton, MatchButton)) -> bool:
+        a, b = pair
+
+        return a.symbol == b.symbol
+    
+    @staticmethod
+    def buttons_matched(a: MatchButton, b: MatchButton):
+        a.background_color = "lime"
+        b.background_color = "lime"
+
+    @staticmethod
+    def buttons_not_mached(a: MatchButton, b: MatchButton):
+        a.background_color = "red"
+        b.background_color = "red"
+
+    
 

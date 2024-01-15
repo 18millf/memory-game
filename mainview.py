@@ -14,17 +14,15 @@ class MainView(GridLayout):
         assert cells % 2 == 0
 
         self.cols = columns
+
         self.__buttons: list[MatchButton] = list()
 
-        for _ in range(cells):
-            button: MatchButton = MatchButton()
-            self.__buttons.append(button)
-
         for i in range(0, cells, 2):
-            button_a: MatchButton = self.__buttons[i]
-            button_b: MatchButton = self.__buttons[i + 1]
+            button_a: MatchButton = MatchButton(MainView.SYMBOLS[i // 2])
+            button_b: MatchButton = MatchButton(MainView.SYMBOLS[i // 2])
 
-            MatchButton.associate(button_a, button_b, MainView.SYMBOLS[i // 2])
+            self.__buttons.append(button_a)
+            self.__buttons.append(button_b)
 
         shuffle(self.__buttons)
 
