@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from kivy.uix.button import Button
 
 
@@ -7,6 +8,15 @@ class RevealingButton(Button):
 
         self.row: int = row
         self.col: int = col
-        self.value: int = value
+        self.value: str = str(value)
 
-        self.text = str(value)
+        self.show()
+        Clock.schedule_once(lambda dt: self.hide(), 10)
+
+    def show(self):
+        self.text = self.value
+        self.disabled = True
+
+    def hide(self):
+        self.text = ""
+        self.disabled = False
